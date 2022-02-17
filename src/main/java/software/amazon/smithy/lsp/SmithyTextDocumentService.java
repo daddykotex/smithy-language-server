@@ -362,25 +362,27 @@ public class SmithyTextDocumentService implements TextDocumentService {
         Map<URI, List<ValidationEvent>> byUri = new HashMap<URI, List<ValidationEvent>>();
 
         for (ValidationEvent ev : events) {
+            URI finalUri;
             try {
+                // can be a uri in the form of jar:file:/some-path
                 String fileName = ev.getSourceLocation().getFilename();
                 String uri = Utils.isJarFile(fileName)
                     ? Utils.toSmithyJarFile(fileName)
                     : !Utils.isFile(fileName) ? "file:" + fileName
                     : fileName;
-                URI finalUri = new URI(uri);
-
-                if (byUri.containsKey(finalUri)) {
-                    byUri.get(finalUri).add(ev);
-                } else {
-                    List<ValidationEvent> l = new ArrayList<ValidationEvent>();
-                    l.add(ev);
-                    byUri.put(finalUri, l);
-                }
+                finalUri = new URI(uri);
             } catch (URISyntaxException ex) {
-                LspLog.println("Ignoring the following file because it's not a valid URI: "
-                    + ev.getSourceLocation().getFilename());
-                // drop the uri
+                // can be a uri in the form of /some-path/ or on windows C:\Some\path
+                // .toURI after a file conversion will produce a standard `file:/Some/Path`
+                finalUri = new File(ev.getSourceLocation().getFilename()).toURI();
+            }
+
+            if (byUri.containsKey(finalUri)) {
+                byUri.get(finalUri).add(ev);
+            } else {
+                List<ValidationEvent> l = new ArrayList<ValidationEvent>();
+                l.add(ev);
+                byUri.put(finalUri, l);
             }
         }
 
