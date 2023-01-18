@@ -147,7 +147,7 @@ public final class Utils {
     /**
      * Read only the first N lines of a file.
      * @param file file to read
-     * @param n number of lines to read, must be >= 0. if n is 3, we'll return lines 0, 1, 2
+     * @param n number of lines to read, must be &gt;= 0. if n is 3, we'll return lines 0, 1, 2
      * @return list of numbered lines, empty if the file does not exist or
      * is empty.
      */
